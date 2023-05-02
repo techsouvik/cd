@@ -1,0 +1,128 @@
+#include "utils/keywords.h"
+#include "utils/identifiers.h"
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#define N 100
+
+int isOperator(char* str) {
+    char operators[17][3] = {"+", "-", "*", "/", "%", "++", "--", "==", "!=", ">", "<", ">=", "<=", "&&", "||", "!", "&"};
+
+    for(int i = 0; i < 17; i++) {
+        if(strcmp(str, operators[i]) == 0) {
+            return 1; // If the string is an operator
+        }
+    }
+
+    return 0; // If the string is not an operator
+}
+
+bool isInteger(char* str)
+{
+	int i, len = strlen(str);
+
+	if (len == 0)
+		return (false);
+	for (i = 0; i < len; i++) {
+		if (str[i] != '0' && str[i] != '1' && str[i] != '2'
+			&& str[i] != '3' && str[i] != '4' && str[i] != '5'
+			&& str[i] != '6' && str[i] != '7' && str[i] != '8'
+			&& str[i] != '9' || (str[i] == '-' && i > 0))
+			return (false);
+	}
+	return (true);
+}
+
+bool isRealNumber(char* str)
+{
+	int i, len = strlen(str);
+	bool hasDecimal = false;
+
+	if (len == 0)
+		return (false);
+	for (i = 0; i < len; i++) {
+		if (str[i] != '0' && str[i] != '1' && str[i] != '2'
+			&& str[i] != '3' && str[i] != '4' && str[i] != '5'
+			&& str[i] != '6' && str[i] != '7' && str[i] != '8'
+			&& str[i] != '9' && str[i] != '.' ||
+			(str[i] == '-' && i > 0))
+			return (false);
+		if (str[i] == '.')
+			hasDecimal = true;
+	}
+	return (hasDecimal);
+}
+
+bool isComment(char str[]) {
+    int firstIdx = -1;
+    int charIdx = -1;
+
+    for (int i = 0; i < N; i++)
+    {
+        if(str[i]=='\0') break;
+        if (str[i]!=' ')
+        {
+            if (firstIdx==-1)
+            {
+                firstIdx = i;
+            }
+            charIdx = i;
+        }
+    }
+
+    int n = (charIdx-firstIdx+1);
+    char *arr;
+    arr = (char*)malloc(n*sizeof(char));
+
+    for (int i = 0; i < n; i++)
+    {
+        arr[i] = str[firstIdx+i];
+    }
+    
+    if(arr[0]=='/' && arr[1]=='/') return true;
+    if (arr[0]=='/' && arr[1]=='*' && arr[n-2]=='*' && arr[n-1]=='/') return true;
+    
+    return false;
+}
+
+int main() {
+    FILE *input = fopen("input-demo.c", "r");
+    FILE *output = fopen("processed-numbers-output.txt", "w");
+
+    char line[1000];
+    char *token;
+    char *delimiters = " \t\n";
+
+    while (fgets(line, 1000, input)) {
+        // Tokenize the line by delimiters
+        
+
+        if(isComment(line)) {
+            fputs(line, output);
+        } else {
+            token = strtok(line, delimiters);
+            while (token != NULL) {
+                // Check if the token is an identifier
+                if (is_identifier(token) && !is_keyword(token)) {
+                    fprintf(output, "id ");
+                }
+                else if (isRealNumber(token) || isInteger(token)) {
+                    fprintf(output, "num ");
+                } else {
+                    fprintf(output, "%s ", token);
+                }
+                // Get the next token
+                token = strtok(NULL, delimiters);
+                
+            }
+        }
+
+        fprintf(output, "\n");
+    }
+
+    return 0;
+
+    
+}

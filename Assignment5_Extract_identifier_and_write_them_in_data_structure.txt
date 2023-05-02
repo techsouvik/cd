@@ -1,0 +1,242 @@
+Read a file containing a C program.
+
+Extract identifiers and write them in a data structure. 
+If the identifier already exists, skip.
+Extract operators  also. 
+
+ Note: An identifier may or may not be delimited by space.
+
+For example,
+
+newval=oldval*60
+Here, newval and oldval are identifers.
+= and * are operators
+Now, tokenize the identifier. 
+Against each line, write id in place of the identifier. 
+Write the operator as it is.
+Any other string has to be written as it is. 
+
+Example
+
+newval=oldval*60
+will be written as id=id*60
+someval=newval+100;
+will be written as id=id+100;
+
+
+
+
+
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX_IDENTIFIER_LENGTH 100
+#define MAX_LINE_LENGTH 1000
+#define MAX_ELEMENTS 100
+#define MAX_RESERVED 1000
+
+// function to insert a new element in a array and not duplicate elements
+void insert_element(char array[][MAX_IDENTIFIER_LENGTH], int *n, char new_element[])
+{
+    int duplicate = 0;
+    for (int i = 0; i < *n; i++)
+    {
+        if (strcmp(array[i], new_element) == 0)
+        {
+            duplicate = 1;
+            break;
+        }
+    }
+    if (duplicate == 0)
+    {
+        if (*n < MAX_ELEMENTS)
+        {
+            strcpy(array[(*n)], new_element);
+            (*n)++;
+        }
+    }
+}
+
+char reserved[MAX_RESERVED][MAX_IDENTIFIER_LENGTH] = {"include", "stdio", "h", "int", "main", "printf", "float", "char", "for", "while", "do", "break", "continue"};
+
+// function to check if a string is a valid identifier
+int is_identifier(char str[])
+{
+    if (!isalpha(str[0]) && str[0] != '_')
+    {
+        return 0;
+    }
+
+    for (int i = 1; i < strlen(str); i++)
+    {
+        if (!isalnum(str[i]) && str[i] != '_')
+        {
+            return 0;
+        }
+    }
+
+    for (int i = 0; i < MAX_RESERVED; i++) {
+        if (strcmp(reserved[i], str) == 0) return 0;
+    }
+
+    return 1;
+}
+
+int main()
+{
+    char line[MAX_LINE_LENGTH];
+    char identifier[MAX_IDENTIFIER_LENGTH];
+    int line_number = 0;
+
+    char array_of_elements[MAX_ELEMENTS][MAX_IDENTIFIER_LENGTH];
+    int array_of_elements_pointer = 0;
+
+    // Open the input file
+    FILE *fp = fopen("input.c", "r");
+    if (fp == NULL)
+    {
+        printf("Error: Could not open file\n");
+        return 1;
+    }
+
+    // Open the output file
+    FILE *output_fp = fopen("output.txt", "w");
+    if (output_fp == NULL)
+    {
+        printf("Error: Could not open file Identifiers.txt\n");
+        fclose(fp);
+        return 1;
+    }
+
+    // Read each line of the input file
+    while (fgets(line, MAX_LINE_LENGTH, fp) != NULL)
+    {
+        line_number++;
+
+        int identifier_start = -1;
+        int identifier_length = 0;
+
+        // Read each character in the line
+        for (int i = 0; i < strlen(line); i++)
+        {
+            char c = line[i];
+
+            // If the character is a letter or underscore, it may be part of an identifier
+            if (isalnum(c) || c == '_')
+            {
+                if (identifier_start == -1)
+                {
+                    identifier_start = i;
+                }
+                identifier_length++;
+            }
+            else
+            {
+                if (identifier_start != -1)
+                {
+                    // Copy the identifier to a separate string
+                    strncpy(identifier, line + identifier_start, identifier_length);
+                    identifier[identifier_length] = '\0';
+
+                    if (is_identifier(identifier))
+                    {
+                        // Write the identifier and its line number to the output file
+                        fprintf(output_fp, "id");
+                        // insert into the array
+                        insert_element(array_of_elements, &array_of_elements_pointer, identifier);
+                    }
+                    else
+                    {
+                        fprintf(output_fp, "%s", identifier);
+                    }
+                    fprintf(output_fp, "%c", c);
+                    identifier_start = -1;
+                    identifier_length = 0;
+                }
+                else
+                {
+                    fprintf(output_fp, "%c", c);
+                }
+            }
+        }
+
+        // Check the last identifier in the line
+        if (identifier_start != -1)
+        {
+            strncpy(identifier, line + identifier_start, identifier_length);
+            identifier[identifier_length] = '\0';
+
+            if (is_identifier(identifier))
+            {
+                fprintf(output_fp, "%s, %d\n", identifier, line_number);
+            }
+            else
+            {
+                fprintf(output_fp, "%s", identifier);
+            }
+        }
+    }
+
+    // Close the input and output files
+    fclose(fp);
+    fclose(output_fp);
+    printf("\nTABLE:\n");
+    for (int i = 0; i < (array_of_elements_pointer + 1); i++)
+    {
+        printf("%s\n", array_of_elements[i]);
+    }
+    return 0;
+}
+
+
+
+
+input.c :-
+
+#include<stdio.h>
+int main(){
+   int a = 10;
+   int b = 20;
+   int c = a+b;
+   printf("%d",c);
+}
+
+
+
+
+format :-
+
+
+avinash@LAPTOP-IG8FUR64:~$ nano extract.c
+avinash@LAPTOP-IG8FUR64:~$ nano input.c
+avinash@LAPTOP-IG8FUR64:~$ nano extract.c
+avinash@LAPTOP-IG8FUR64:~$ gcc extract.c
+avinash@LAPTOP-IG8FUR64:~$ ./a.out
+
+TABLE:
+a
+b
+c
+d
+
+avinash@LAPTOP-IG8FUR64:~$ nano output.txt
+
+
+
+
+output.txt :-
+
+
+#include<stdio.h>
+int main(){
+   int id = 10;
+   int id = 20;
+   int id = id+id;
+   printf("%id",id);
+}
+
+
+
+

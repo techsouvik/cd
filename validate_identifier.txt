@@ -1,0 +1,68 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+#define N 100
+
+bool isNumeric(char ch) {
+    int c = ch;
+    if(48<=c && c<=57) return true;
+    return false;
+}
+
+bool isAlphabetic(char ch) {
+    int c = ch;
+    if(65<=c && c<=90) return true;
+    if(97<=c && c<=122) return true;
+
+    return false;
+}
+
+bool isUnderScore(char ch) {
+    int c = ch;
+    if(c=='_') return true;
+    return false;
+}
+
+bool isValidIdentifer(char str[]) {
+    int firstIdx = -1;
+    int charIdx = -1;
+
+    for (int i = 0; i < N; i++)
+    {
+        if(str[i]=='\0') break;
+        if (str[i]!=' ')
+        {
+            if (firstIdx==-1)
+            {
+                firstIdx = i;
+            }
+            charIdx = i;
+        }
+    }
+
+    int n = (charIdx-firstIdx+1);
+    char *arr;
+    arr = (char*)malloc(n*sizeof(char));
+
+    for (int i = 0; i < n; i++) {
+        arr[i] = str[firstIdx+i];
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if(i==0 && !isAlphabetic(arr[i])) return false;
+        if(!isAlphabetic(arr[i]) && !isNumeric(arr[i]) && !isUnderScore(arr[i])) return false;
+    }
+
+    return true;
+    
+}
+
+int main() {
+    char str[N];
+    gets(str);
+
+    printf("%d", isValidIdentifer(str));
+
+    return 0;
+}

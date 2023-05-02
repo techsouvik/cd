@@ -1,0 +1,56 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+#define N 100
+
+bool isComment(char str[]) {
+    int firstIdx = -1;
+    int charIdx = -1;
+
+    for (int i = 0; i < N; i++)
+    {
+        if(str[i]=='\0') break;
+        if (str[i]!=' ')
+        {
+            if (firstIdx==-1)
+            {
+                firstIdx = i;
+            }
+            charIdx = i;
+        }
+    }
+
+    int n = (charIdx-firstIdx+1);
+    char *arr;
+    arr = (char*)malloc(n*sizeof(char));
+
+    for (int i = 0; i < n; i++)
+    {
+        arr[i] = str[firstIdx+i];
+    }
+    
+    if(arr[0]=='/' && arr[1]=='/') return true;
+    if (arr[0]=='/' && arr[1]=='*' && arr[n-2]=='*' && arr[n-1]=='/') return true;
+    
+    return false;
+}
+
+int main() {
+    FILE *inputFile, *outputFile;
+    inputFile = fopen("comment.txt", "r");
+    outputFile = fopen("ass2_output.txt", "w");
+
+    char line[N];
+    while (fgets(line, 100, inputFile)!=NULL){
+        if (isComment(line))
+        {
+            fprintf(outputFile, "%s", line);
+        }   
+    }
+
+    fclose(inputFile);
+    fclose(outputFile);
+
+    return 0;
+    
+}
